@@ -111,7 +111,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <script>
+ <script>
     const firebaseConfig = {
   apiKey: "AIzaSyAnit284Kj3Rv3hXphywKMW-S1jg7TcV_8",
   authDomain: "biblestory-d636c.firebaseapp.com",
@@ -124,8 +124,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const recordsCol = db.collection('records');
-   // ✅ 초등학생용 40문제 (정답=단어, 중복 ref 제거)
-let QUESTIONS = [
+    /* === // Firebase 끝 === */
+
+   let QUESTIONS = [
   {book:"창세기",ref:"1:1",before:"태초에",blank:"하나님",after:"이 천지를 창조하시니라",answers:["하나님"]},
   {book:"시편",ref:"23:1",before:"여호와는 나의",blank:"목자",after:"시니 내가 부족함이 없으리로다",answers:["목자"]},
   {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요 진리요",blank:"생명",after:"이니",answers:["생명"]},
@@ -169,12 +170,11 @@ let QUESTIONS = [
   {book:"빌립보서",ref:"4:6",before:"아무 것도",blank:"염려",after:"하지 말고",answers:["염려"]}
 ];
 
-
     // ===== 게임 설정 상수 =====
     const TARGET=1000, POINT=50, LIMIT=20, MAX_LIVES=10;
 
     // ===== 상태 변수 =====
-    let playerName='게스트',score=0,idx=0,left=LIMIT,order=[],timer=null,currentQ=null,lives=MAX_LIVES,locked=false;
+    let playerName='게스트',score=0,idx=0,left=LIMIT,order=[],timer=null,currentQ=null,lives=MAX_LIVES,locked=false,gameEnded=false;
 
     // ===== 엘리먼트 캐시 =====
     const el={
@@ -198,11 +198,12 @@ let QUESTIONS = [
     // ===== 게임 로직 =====
     function startGame(){
       playerName=el.nameInput.value||'게스트';el.playerBadge.textContent=playerName;
-      score=0;idx=0;lives=MAX_LIVES;el.lives.textContent=lives;el.score.textContent=score;el.qIndex.textContent=0;
+      score=0;idx=0;lives=MAX_LIVES;el.lives.textContent=lives;el.score.textContent=score;el.qIndex.textContent=0; gameEnded=false;
       order=[...Array(QUESTIONS.length).keys()];shuffle(order);showQuiz();nextQuestion();
     }
 
     function nextQuestion(){
+      if(gameEnded) return;
       if(lives<=0){endGame(false);return;}
       if(score>=TARGET){endGame(true);return;}
       if(order.length===0){order=[...Array(QUESTIONS.length).keys()];shuffle(order);} // 무한 랜덤 로테이션
@@ -216,7 +217,13 @@ let QUESTIONS = [
 
     function isCorrectInput(){if(!currentQ)return false;const ans=norm(el.answer.value);const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);return accepts.includes(ans);}    
 
-    function submitAnswer(){if(locked)return;locked=true;const ans=norm(el.answer.value.trim());const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);if(accepts.includes(ans)){score+=POINT;el.score.textContent=score;feedback(true,'정답!');setTimeout(nextQuestion,650);}else{loseLife('오답! 정답: '+currentQ.blank);}}
+    function submitAnswer(){if(locked)return;locked=true;const ans=norm(el.answer.value.trim());const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);if(accepts.includes(ans)){score+=POINT;el.score.textContent=score;feedback(true,'정답!');
+        if(score>=TARGET){
+          clearInterval(timer);
+          setTimeout(()=>endGame(true),300);
+        } else {
+          setTimeout(nextQuestion,650);
+        }}else{loseLife('오답! 정답: '+currentQ.blank);}}
 
     function loseLife(msg){locked=true;lives--;el.lives.textContent=lives;feedback(false,msg);if(lives<=0){endGame(false);}else{setTimeout(nextQuestion,800);}}
 
@@ -229,6 +236,9 @@ let QUESTIONS = [
 
     // ===== 랭킹 저장/조회 (Firebase) =====
     async function endGame(success=true){
+      if(gameEnded) return; // 중복 저장 방지
+      gameEnded=true;
+      clearInterval(timer);
       if(success && lives>0){
         const now=new Date();
         const finished= now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
@@ -262,45 +272,71 @@ let QUESTIONS = [
       catch(e){console.error(e);alert('초기화 실패. 콘솔을 확인해 주세요.');}
     };
 
-    // === 운영자 도우미 함수 ===
+// === 운영자 도우미 함수 ===
 function formatNow(){
   const now=new Date();
   return now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
 }
+
 async function adminAddRecord(){
-  const name=prompt("등록할 이름을 입력하세요 (예: 홍길동)");
-  if(!name) return;
-  const scoreStr=prompt("점수(정수)를 입력하세요 (예: 850)");
-  if(scoreStr===null) return; const score=parseInt(scoreStr,10);
-  if(Number.isNaN(score)||score<0||score>100000){ alert("점수 입력이 올바르지 않습니다."); return; }
-const timeInput=prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장\n예: 2025-09-27 21:03:00');
-  const time=(timeInput&&timeInput.trim())?timeInput.trim():formatNow();
-  try{
-    await recordsCol.add({ name:name, score:score, time:time, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  const name = prompt("등록할 이름을 입력하세요 (예: 홍길동)");
+  if (!name) return;
+
+  const scoreStr = prompt("점수(정수)를 입력하세요 (예: 850)");
+  if (scoreStr === null) return;
+  const score = parseInt(scoreStr, 10);
+  if (Number.isNaN(score) || score < 0 || score > 100000) {
+    alert("점수 입력이 올바르지 않습니다."); return;
+  }
+
+  const timeInput = prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장\n예: 2025-09-27 21:03:00');
+  const time = (timeInput && timeInput.trim()) ? timeInput.trim() : formatNow();
+
+  try {
+    await recordsCol.add({
+      name, score, time,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     alert('랭킹에 등록했습니다 ✅');
     renderLeaderboard();
-  }catch(e){ console.error(e); alert('등록 실패 😭 — 콘솔을 확인하세요.'); }
+  } catch (e) {
+    console.error(e);
+    alert('등록 실패 😭 — 콘솔을 확인하세요.');
+  }
 }
-// === 운영자 버튼 (신규 메뉴) ===
-document.getElementById('adminBtn').onclick=async()=>{
-  const pw=prompt('비밀번호 입력');
-  if(pw!=='eckc3004'){ alert('비밀번호 오류'); return; }
-  const sel=prompt('운영자 메뉴
-1: 랭킹 등록(수동 추가)
-2: 랭킹 초기화(전체 삭제)
-그 외: 취소');
-  if(sel==='1'){
+
+// === 운영자 버튼 (메뉴형) — 앞서 있던 초기화 전용 핸들러는 삭제! ===
+document.getElementById('adminBtn').onclick = async () => {
+  const pw = prompt('비밀번호 입력');
+  if (pw !== 'eckc3004') { alert('비밀번호 오류'); return; }
+
+  const sel = prompt(
+    '운영자 메뉴\n' +
+    '1: 랭킹 등록(수동 추가)\n' +
+    '2: 랭킹 초기화(전체 삭제)\n' +
+    '그 외: 취소'
+  );
+
+  if (sel === '1') {
     await adminAddRecord();
-  }else if(sel==='2'){
-    if(!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
-    try{
-      const snap=await recordsCol.get(); const jobs=[]; snap.forEach(d=>jobs.push(d.ref.delete()));
+  } else if (sel === '2') {
+    if (!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
+    try {
+      const snap = await recordsCol.get();
+      const jobs = [];
+      snap.forEach(d => jobs.push(d.ref.delete()));
       await Promise.all(jobs);
       alert('랭킹이 초기화되었습니다.');
       renderLeaderboard();
-    }catch(e){ console.error(e); alert('초기화 실패 — 콘솔을 확인하세요.'); }
-  } else { /* 취소 */ }
+    } catch (e) {
+      console.error(e);
+      alert('초기화 실패 — 콘솔을 확인하세요.');
+    }
+  } else {
+    // 취소
+  }
 };
+
 
 // 초기화
     attachAnswerListeners();

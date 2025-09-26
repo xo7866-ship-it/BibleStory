@@ -31,7 +31,7 @@
     .progress>div{height:100%;background:linear-gradient(90deg,#ffb84d,#ff6b6b);width:100%}
     .verse{font-size:1.25rem;line-height:1.9}
     .verse .blank{display:inline-block;min-width:8ch;padding:.15rem .35rem;border-bottom:2px dashed #5a73d6;border-radius:6px;background:rgba(122,162,255,.06)}
-    .result{padding:12px 14px;border-radius:12px;background:#0f1731;border:1px solid #243267}
+    .result{padding:12px 14px;border-radius:12px;background:#0f1731;border:1px solid #243267;pointer-events:none}
     .result.good{border-color:#24674d;background:#0f1d19}
     .result.bad{border-color:#673024;background:#1d1010}
     table{width:100%;border-collapse:collapse}
@@ -111,64 +111,64 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
- <script>
+  <script>
+    // === Firebase ===
     const firebaseConfig = {
-  apiKey: "AIzaSyAnit284Kj3Rv3hXphywKMW-S1jg7TcV_8",
-  authDomain: "biblestory-d636c.firebaseapp.com",
-  projectId: "biblestory-d636c",
-  storageBucket: "biblestory-d636c.appspot.com",
-  messagingSenderId: "823812059117",
-  appId: "1:823812059117:web:777a2266b354945780c1e4",
-  measurementId: "G-5Z4KX2XPP8"
-};
+      apiKey: "AIzaSyAnit284Kj3Rv3hXphywKMW-S1jg7TcV_8",
+      authDomain: "biblestory-d636c.firebaseapp.com",
+      projectId: "biblestory-d636c",
+      storageBucket: "biblestory-d636c.appspot.com",
+      messagingSenderId: "823812059117",
+      appId: "1:823812059117:web:777a2266b354945780c1e4",
+      measurementId: "G-5Z4KX2XPP8"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const recordsCol = db.collection('records');
-    /* === // Firebase 끝 === */
 
-   let QUESTIONS = [
-  {book:"창세기",ref:"1:1",before:"태초에",blank:"하나님",after:"이 천지를 창조하시니라",answers:["하나님"]},
-  {book:"시편",ref:"23:1",before:"여호와는 나의",blank:"목자",after:"시니 내가 부족함이 없으리로다",answers:["목자"]},
-  {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요 진리요",blank:"생명",after:"이니",answers:["생명"]},
-  {book:"마태복음",ref:"5:9",before:"화평하게 하는 자는 하나님의",blank:"아들",after:"이라 일컬음을 받을 것이요",answers:["아들"]},
-  {book:"잠언",ref:"1:7",before:"여호와를 경외하는 것이",blank:"지식",after:"의 근본이거늘",answers:["지식"]},
-  {book:"이사야",ref:"9:6",before:"이는 한 아기가 우리에게 났고 한",blank:"아들",after:"을 우리에게 주신 바 되었는데",answers:["아들"]},
-  {book:"요한일서",ref:"4:8",before:"사랑하지 아니하는 자는",blank:"하나님",after:"을 알지 못하나니",answers:["하나님"]},
-  {book:"마태복음",ref:"6:11",before:"오늘 우리에게 일용할",blank:"양식",after:"을 주옵시고",answers:["양식"]},
-  {book:"출애굽기",ref:"20:13",before:"너는",blank:"살인",after:"하지 말라",answers:["살인"]},
-  {book:"출애굽기",ref:"20:15",before:"너는",blank:"도둑질",after:"하지 말라",answers:["도둑질"]},
-  {book:"출애굽기",ref:"20:16",before:"너는 네 이웃에 대하여",blank:"거짓",after:"증거하지 말라",answers:["거짓"]},
-  {book:"마태복음",ref:"22:39",before:"네",blank:"이웃",after:"을 네 자신과 같이 사랑하라 하셨으니",answers:["이웃"]},
-  {book:"요한복음",ref:"6:35",before:"예수께서 이르시되 나는 생명의",blank:"떡",after:"이니",answers:["떡"]},
-  {book:"요한계시록",ref:"22:13",before:"나는 알파와",blank:"오메가",after:"요 처음과 마지막이요 시작과 끝이라",answers:["오메가"]},
-  {book:"시편",ref:"119:105",before:"주의 말씀은 내 발에",blank:"등",after:"이요 내 길에 빛이니이다",answers:["등"]},
-  {book:"요한복음",ref:"11:25",before:"예수께서 이르시되 나는 부활이요",blank:"생명",after:"이니",answers:["생명"]},
-  {book:"갈라디아서",ref:"5:22",before:"오직 성령의",blank:"열매",after:"는 사랑과 희락과 화평이요",answers:["열매"]},
-  {book:"마태복음",ref:"7:7",before:"구하라 그리하면 너희에게",blank:"주실",after:"것이요",answers:["주실","준다"]},
-  {book:"고린도전서",ref:"13:13",before:"그런즉 믿음 소망",blank:"사랑",after:"이 항상 있을 것인데",answers:["사랑"]},
-  {book:"빌립보서",ref:"4:4",before:"주 안에서 항상",blank:"기뻐",after:"하라",answers:["기뻐","기뻐하라"]},
-
-  {book:"요한복음",ref:"3:16",before:"하나님이 세상을 이처럼 사랑하사",blank:"독생자",after:"를 주셨으니",answers:["독생자"]},
-  {book:"마태복음",ref:"5:14",before:"너희는 세상의",blank:"빛",after:"이라",answers:["빛"]},
-  {book:"마태복음",ref:"6:33",before:"그런즉 너희는 먼저 그의 나라와 그의",blank:"의",after:"를 구하라",answers:["의"]},
-  {book:"출애굽기",ref:"20:12",before:"네",blank:"부모",after:"를 공경하라",answers:["부모"]},
-  {book:"에베소서",ref:"6:1",before:"자녀들아 너희",blank:"부모",after:"에게 순종하라",answers:["부모"]},
-  {book:"마가복음",ref:"10:14",before:"어린",blank:"아이",after:"들이 내게 오는 것을 용납하라",answers:["아이","어린이"]},
-  {book:"요한일서",ref:"4:19",before:"우리가",blank:"사랑",after:"함은 그가 먼저 우리를 사랑하셨음이라",answers:["사랑"]},
-  {book:"잠언",ref:"3:5",before:"너는 마음을 다하여 여호와를",blank:"의뢰",after:"하고",answers:["의뢰","신뢰"]},
-  {book:"잠언",ref:"22:6",before:"마땅히 행할 길을",blank:"아이",after:"에게 가르치라",answers:["아이"]},
-  {book:"시편",ref:"150:6",before:"호흡이 있는 자마다 여호와를",blank:"찬양",after:"할지어다",answers:["찬양"]},
-  {book:"시편",ref:"121:2",before:"나의 도움이 천지를 지으신",blank:"여호와",after:"에게서로다",answers:["여호와"]},
-  {book:"데살로니가전서",ref:"5:17",before:"쉬지 말고",blank:"기도",after:"하라",answers:["기도"]},
-  {book:"데살로니가전서",ref:"5:18",before:"범사에",blank:"감사",after:"하라",answers:["감사"]},
-  {book:"요한계시록",ref:"22:20",before:"주 예수여",blank:"오시옵소서",after:"",answers:["오시옵소서"]},
-  {book:"요한복음",ref:"8:12",before:"예수께서 이르시되 나는 세상의",blank:"빛",after:"이니",answers:["빛"]},
-  {book:"사도행전",ref:"16:31",before:"주 예수를",blank:"믿으라",after:" 그리하면 너와 네 집이 구원을 받으리라",answers:["믿으라","믿어라"]},
-  {book:"누가복음",ref:"6:31",before:"남에게 대접을 받고자 하는 대로 너희도",blank:"대접",after:"하라",answers:["대접"]},
-  {book:"누가복음",ref:"19:10",before:"인자가 온 것은 잃어버린 자를 찾아",blank:"구원",after:"하려 함이니라",answers:["구원"]},
-  {book:"고린도전서",ref:"10:31",before:"무엇을 하든지 다 하나님의",blank:"영광",after:"을 위하여 하라",answers:["영광"]},
-  {book:"빌립보서",ref:"4:6",before:"아무 것도",blank:"염려",after:"하지 말고",answers:["염려"]}
-];
+    // ===== 문제 =====
+    let QUESTIONS = [
+      {book:"창세기",ref:"1:1",before:"태초에",blank:"하나님",after:"이 천지를 창조하시니라",answers:["하나님"]},
+      {book:"시편",ref:"23:1",before:"여호와는 나의",blank:"목자",after:"시니 내가 부족함이 없으리로다",answers:["목자"]},
+      {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요 진리요",blank:"생명",after:"이니",answers:["생명"]},
+      {book:"마태복음",ref:"5:9",before:"화평하게 하는 자는 하나님의",blank:"아들",after:"이라 일컬음을 받을 것이요",answers:["아들"]},
+      {book:"잠언",ref:"1:7",before:"여호와를 경외하는 것이",blank:"지식",after:"의 근본이거늘",answers:["지식"]},
+      {book:"이사야",ref:"9:6",before:"이는 한 아기가 우리에게 났고 한",blank:"아들",after:"을 우리에게 주신 바 되었는데",answers:["아들"]},
+      {book:"요한일서",ref:"4:8",before:"사랑하지 아니하는 자는",blank:"하나님",after:"을 알지 못하나니",answers:["하나님"]},
+      {book:"마태복음",ref:"6:11",before:"오늘 우리에게 일용할",blank:"양식",after:"을 주옵시고",answers:["양식"]},
+      {book:"출애굽기",ref:"20:13",before:"너는",blank:"살인",after:"하지 말라",answers:["살인"]},
+      {book:"출애굽기",ref:"20:15",before:"너는",blank:"도둑질",after:"하지 말라",answers:["도둑질"]},
+      {book:"출애굽기",ref:"20:16",before:"너는 네 이웃에 대하여",blank:"거짓",after:"증거하지 말라",answers:["거짓"]},
+      {book:"마태복음",ref:"22:39",before:"네",blank:"이웃",after:"을 네 자신과 같이 사랑하라 하셨으니",answers:["이웃"]},
+      {book:"요한복음",ref:"6:35",before:"예수께서 이르시되 나는 생명의",blank:"떡",after:"이니",answers:["떡"]},
+      {book:"요한계시록",ref:"22:13",before:"나는 알파와",blank:"오메가",after:"요 처음과 마지막이요 시작과 끝이라",answers:["오메가"]},
+      {book:"시편",ref:"119:105",before:"주의 말씀은 내 발에",blank:"등",after:"이요 내 길에 빛이니이다",answers:["등"]},
+      {book:"요한복음",ref:"11:25",before:"예수께서 이르시되 나는 부활이요",blank:"생명",after:"이니",answers:["생명"]},
+      {book:"갈라디아서",ref:"5:22",before:"오직 성령의",blank:"열매",after:"는 사랑과 희락과 화평이요",answers:["열매"]},
+      {book:"마태복음",ref:"7:7",before:"구하라 그리하면 너희에게",blank:"주실",after:"것이요",answers:["주실","준다"]},
+      {book:"고린도전서",ref:"13:13",before:"그런즉 믿음 소망",blank:"사랑",after:"이 항상 있을 것인데",answers:["사랑"]},
+      {book:"빌립보서",ref:"4:4",before:"주 안에서 항상",blank:"기뻐",after:"하라",answers:["기뻐","기뻐하라"]},
+      {book:"요한복음",ref:"3:16",before:"하나님이 세상을 이처럼 사랑하사",blank:"독생자",after:"를 주셨으니",answers:["독생자"]},
+      {book:"마태복음",ref:"5:14",before:"너희는 세상의",blank:"빛",after:"이라",answers:["빛"]},
+      {book:"마태복음",ref:"6:33",before:"그런즉 너희는 먼저 그의 나라와 그의",blank:"의",after:"를 구하라",answers:["의"]},
+      {book:"출애굽기",ref:"20:12",before:"네",blank:"부모",after:"를 공경하라",answers:["부모"]},
+      {book:"에베소서",ref:"6:1",before:"자녀들아 너희",blank:"부모",after:"에게 순종하라",answers:["부모"]},
+      {book:"마가복음",ref:"10:14",before:"어린",blank:"아이",after:"들이 내게 오는 것을 용납하라",answers:["아이","어린이"]},
+      {book:"요한일서",ref:"4:19",before:"우리가",blank:"사랑",after:"함은 그가 먼저 우리를 사랑하셨음이라",answers:["사랑"]},
+      {book:"잠언",ref:"3:5",before:"너는 마음을 다하여 여호와를",blank:"의뢰",after:"하고",answers:["의뢰","신뢰"]},
+      {book:"잠언",ref:"22:6",before:"마땅히 행할 길을",blank:"아이",after:"에게 가르치라",answers:["아이"]},
+      {book:"시편",ref:"150:6",before:"호흡이 있는 자마다 여호와를",blank:"찬양",after:"할지어다",answers:["찬양"]},
+      {book:"시편",ref:"121:2",before:"나의 도움이 천지를 지으신",blank:"여호와",after:"에게서로다",answers:["여호와"]},
+      {book:"데살로니가전서",ref:"5:17",before:"쉬지 말고",blank:"기도",after:"하라",answers:["기도"]},
+      {book:"데살로니가전서",ref:"5:18",before:"범사에",blank:"감사",after:"하라",answers:["감사"]},
+      {book:"요한계시록",ref:"22:20",before:"주 예수여",blank:"오시옵소서",after:"",answers:["오시옵소서"]},
+      {book:"요한복음",ref:"8:12",before:"예수께서 이르시되 나는 세상의",blank:"빛",after:"이니",answers:["빛"]},
+      {book:"사도행전",ref:"16:31",before:"주 예수를",blank:"믿으라",after:" 그리하면 너와 네 집이 구원을 받으리라",answers:["믿으라","믿어라"]},
+      {book:"누가복음",ref:"6:31",before:"남에게 대접을 받고자 하는 대로 너희도",blank:"대접",after:"하라",answers:["대접"]},
+      {book:"누가복음",ref:"19:10",before:"인자가 온 것은 잃어버린 자를 찾아",blank:"구원",after:"하려 함이니라",answers:["구원"]},
+      {book:"고린도전서",ref:"10:31",before:"무엇을 하든지 다 하나님의",blank:"영광",after:"을 위하여 하라",answers:["영광"]},
+      {book:"빌립보서",ref:"4:6",before:"아무 것도",blank:"염려",after:"하지 말고",answers:["염려"]}
+    ];
 
     // ===== 게임 설정 상수 =====
     const TARGET=1000, POINT=50, LIMIT=20, MAX_LIVES=10;
@@ -176,7 +176,7 @@
     // ===== 상태 변수 =====
     let playerName='게스트',score=0,idx=0,left=LIMIT,order=[],timer=null,currentQ=null,lives=MAX_LIVES,locked=false,gameEnded=false;
 
-    // ===== 엘리먼트 캐시 =====
+    // ===== 엘리먼트 =====
     const el={
       start:document.getElementById('start'),quiz:document.getElementById('quiz'),leaderboard:document.getElementById('leaderboard'),
       nameInput:document.getElementById('nameInput'),playerBadge:document.getElementById('playerBadge'),score:document.getElementById('score'),
@@ -195,204 +195,121 @@
     function showQuiz(){el.start.style.display='none';el.quiz.style.display='block';el.leaderboard.style.display='none';el.scoreBoard.style.display='flex';}
     async function showLeaderboard(){clearInterval(timer);el.start.style.display='none';el.quiz.style.display='none';el.leaderboard.style.display='block';el.scoreBoard.style.display='none';await renderLeaderboard();}
 
+    // ===== 입력 박스 교체(잔존값 제거) & 리스너 =====
+    function resetAnswerInput(){
+      const old=document.getElementById('answer');
+      const fresh=old.cloneNode(false);
+      fresh.id='answer';
+      fresh.className=old.className;
+      fresh.type='text';
+      fresh.placeholder=old.placeholder;
+      fresh.autocomplete='off';
+      fresh.autocapitalize='off';
+      fresh.autocorrect='off';
+      fresh.spellcheck=false;
+      fresh.inputMode='text';
+      old.parentNode.replaceChild(fresh,old);
+      el.answer=fresh; el.answer.value='';
+      attachAnswerListeners();
+    }
+
+    function attachAnswerListeners(){
+      el.answer.addEventListener('keydown',e=>{ if(e.key==='Enter'){ submitAnswer(); }});
+      el.answer.addEventListener('input',()=>{ if(!locked && isCorrectInput()){ submitAnswer(); }});
+    }
+
     // ===== 게임 로직 =====
-  function startGame(){
-  playerName = el.nameInput.value || '게스트';
-  el.playerBadge.textContent = playerName;
-  score = 0; idx = 0; lives = MAX_LIVES;
-  el.lives.textContent = lives; el.score.textContent = score; el.qIndex.textContent = 0;
-  gameEnded = false;                         // ← 중복 저장 방지 플래그 리셋
-  order = [...Array(QUESTIONS.length).keys()];
-  shuffle(order);
-  showQuiz();
-  nextQuestion();
-}
-
-function nextQuestion(){
-  if (gameEnded) return;                    // ← 이미 끝났으면 진행 중단
-  if (lives <= 0) { endGame(false); return; }
-  if (score >= TARGET) { endGame(true); return; }
-
-  if (order.length === 0) {
-    order = [...Array(QUESTIONS.length).keys()];
-    shuffle(order);                          // 무한 랜덤 로테이션
-  }
-  currentQ = QUESTIONS[order.shift()]; idx++;
-  el.qIndex.textContent = idx;
-  el.ref.textContent = `${currentQ.book} ${currentQ.ref}`;
-  el.verse.innerHTML = `${currentQ.before} <span class="blank">_____</span> ${currentQ.after}`;
-  resetAnswerInput();
-  locked = false;
-  setTimeout(()=>{ try{ el.answer.focus(); }catch(e){} }, 0);
-  runTimer();
-}
-
-function runTimer(){
-  left = LIMIT;
-  el.time.textContent = left;
-  el.bar.style.width = '100%';
-  clearInterval(timer);
-  timer = setInterval(()=>{
-    left--;
-    el.time.textContent = left;
-    el.bar.style.width = (left / LIMIT * 100) + '%';
-    if (left < 0) {
-      clearInterval(timer);
-      loseLife(`⏰ 시간초과! 정답: ${currentQ.blank}`);
-    }
-  }, 1000);
-}
-
-function isCorrectInput(){
-  if (!currentQ) return false;
-  const ans = norm(el.answer.value);
-  const accepts = (currentQ.answers && currentQ.answers.length ? currentQ.answers : [currentQ.blank]).map(norm);
-  return accepts.includes(ans);
-}
-
-function submitAnswer(){
-  if (locked || gameEnded) return;          // ← 중복 입력 방지
-  locked = true;
-
-  const ans = norm(el.answer.value.trim());
-  const accepts = (currentQ.answers && currentQ.answers.length ? currentQ.answers : [currentQ.blank]).map(norm);
-
-  if (accepts.includes(ans)) {
-    score += POINT;
-    el.score.textContent = score;
-    feedback(true, '정답!');
-
-    if (score >= TARGET) {                  // ← 여기서 즉시 종료
-      clearInterval(timer);
-      endGame(true);                        // setTimeout 없이 바로 호출
-      return;                               // ← 중요: 더 진행하지 않음
+    function startGame(){
+      playerName=el.nameInput.value||'게스트'; el.playerBadge.textContent=playerName;
+      score=0; idx=0; lives=MAX_LIVES; el.lives.textContent=lives; el.score.textContent=score; el.qIndex.textContent=0;
+      gameEnded=false; order=[...Array(QUESTIONS.length).keys()]; shuffle(order); showQuiz(); nextQuestion();
     }
 
-    setTimeout(nextQuestion, 650);
-  } else {
-    loseLife('오답! 정답: ' + currentQ.blank);
-  }
-}
+    function nextQuestion(){
+      if(gameEnded) return; if(lives<=0){endGame(false);return;} if(score>=TARGET){endGame(true);return;}
+      if(order.length===0){order=[...Array(QUESTIONS.length).keys()]; shuffle(order);} 
+      currentQ=QUESTIONS[order.shift()]; idx++; el.qIndex.textContent=idx; el.ref.textContent=`${currentQ.book} ${currentQ.ref}`;
+      el.verse.innerHTML=`${currentQ.before} <span class="blank">_____</span> ${currentQ.after}`;
+      resetAnswerInput(); locked=false; setTimeout(()=>{ try{el.answer.focus();}catch(e){} },0); runTimer();
+    }
 
-function loseLife(msg){
-  locked = true;
-  lives--; el.lives.textContent = lives;
-  feedback(false, msg);
-  if (lives <= 0) { endGame(false); }
-  else { setTimeout(nextQuestion, 800); }
-}
+    function runTimer(){
+      left=LIMIT; el.time.textContent=left; el.bar.style.width='100%'; clearInterval(timer);
+      timer=setInterval(()=>{ left--; el.time.textContent=left; el.bar.style.width=(left/LIMIT*100)+'%'; if(left<0){ clearInterval(timer); loseLife(`⏰ 시간초과! 정답: ${currentQ.blank}`); } },1000);
+    }
 
-function feedback(ok, msg){
-  el.feedback.style.display = 'block';
-  el.feedback.textContent = msg;
-  el.feedback.className = 'result ' + (ok ? 'good' : 'bad');
-}
+    function isCorrectInput(){ if(!currentQ) return false; const ans=norm(el.answer.value); const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm); return accepts.includes(ans);}    
 
-    // ===== 랭킹 저장/조회 (Firebase) =====
+    function submitAnswer(){
+      if(locked||gameEnded) return; locked=true; const ans=norm(el.answer.value.trim());
+      const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);
+      if(accepts.includes(ans)){
+        score+=POINT; el.score.textContent=score; feedback(true,'정답!');
+        if(score>=TARGET){ clearInterval(timer); endGame(true); return; }
+        setTimeout(nextQuestion,650);
+      }else{ loseLife('오답! 정답: '+currentQ.blank); }
+    }
+
+    function loseLife(msg){ locked=true; lives--; el.lives.textContent=lives; feedback(false,msg); if(lives<=0){ endGame(false);} else { setTimeout(nextQuestion,800);} }
+
+    function feedback(ok,msg){ el.feedback.style.display='block'; el.feedback.textContent=msg; el.feedback.className='result '+(ok?'good':'bad'); }
+
+    // ===== 랭킹 저장/조회 =====
     async function endGame(success=true){
-      if(gameEnded) return; // 중복 저장 방지
-      gameEnded=true;
-      clearInterval(timer);
+      if(gameEnded) return; gameEnded=true; clearInterval(timer);
       if(success && lives>0){
-        const now=new Date();
-        const finished= now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
-        try{await recordsCol.add({name:playerName||'게스트',score:score,time:finished,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
-        catch(e){console.error('saveRecord failed:',e);alert('기록 저장 중 오류가 발생했어요 😭');}
+        const now=new Date(); const finished= now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
+        try{ await recordsCol.add({ name:playerName||'게스트', score:score, time:finished, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); }
+        catch(e){ console.error('saveRecord failed:',e); alert('기록 저장 중 오류가 발생했어요 😭'); }
       }
       showLeaderboard();
     }
 
     async function renderLeaderboard(){
       try{
-        const snap=await recordsCol.orderBy('score','desc').orderBy('createdAt','asc').limit(100).get();
-        const rows=[];let rank=1;snap.forEach(doc=>{const r=doc.data();rows.push(`<tr><td>${rank++}</td><td>${(r.name||'')}</td><td>${(r.score||0)}</td><td>${(r.time||'')}</td></tr>`);});
-        el.lbBody.innerHTML=rows.join('')||`<tr><td colspan="4">아직 기록이 없습니다.</td></tr>`;
-      }catch(e){console.error(e);el.lbBody.innerHTML=`<tr><td colspan="4">랭킹을 불러오지 못했어요.</td></tr>`;}
+        // 복합 인덱스 요구를 피하기 위해 score 단일 정렬만 사용하고, 동점은 클라이언트에서 createdAt으로 정렬
+        const snap=await recordsCol.orderBy('score','desc').limit(100).get();
+        const data=[]; snap.forEach(doc=> data.push(doc.data()));
+        data.sort((a,b)=>{
+          if((b.score||0)!==(a.score||0)) return (b.score||0)-(a.score||0);
+          const ta=a.createdAt?.toMillis?.()||0; const tb=b.createdAt?.toMillis?.()||0; return ta-tb;
+        });
+        const rows=[]; let rank=1; data.forEach(r=> rows.push(`<tr><td>${rank++}</td><td>${r.name||''}</td><td>${r.score||0}</td><td>${r.time||''}</td></tr>`));
+        el.lbBody.innerHTML= rows.join('') || `<tr><td colspan="4">아직 기록이 없습니다.</td></tr>`;
+      }catch(e){ console.error(e); el.lbBody.innerHTML=`<tr><td colspan="4">랭킹을 불러오지 못했어요.<br/>(${e.message||e})</td></tr>`; }
     }
+
+    // ===== 운영자 메뉴 =====
+    function formatNow(){ const now=new Date(); return now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString(); }
+    async function adminAddRecord(){
+      const name=prompt("등록할 이름을 입력하세요 (예: 홍길동)"); if(!name) return;
+      const scoreStr=prompt("점수(정수)를 입력하세요 (예: 850)"); if(scoreStr===null) return; const score=parseInt(scoreStr,10);
+      if(Number.isNaN(score)||score<0||score>100000){ alert("점수 입력이 올바르지 않습니다."); return; }
+      const timeInput=prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장\n예: 2025-09-27 21:03:00');
+      const time=(timeInput&&timeInput.trim())?timeInput.trim():formatNow();
+      try{ await recordsCol.add({ name, score, time, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); alert('랭킹에 등록했습니다 ✅'); renderLeaderboard(); }
+      catch(e){ console.error(e); alert('등록 실패 😭 — 콘솔을 확인하세요.'); }
+    }
+
+    document.getElementById('adminBtn').onclick=async()=>{
+      const pw=prompt('비밀번호 입력'); if(pw!=='eckc3004'){ alert('비밀번호 오류'); return; }
+      const sel=prompt('운영자 메뉴\n1: 랭킹 등록(수동 추가)\n2: 랭킹 초기화(전체 삭제)\n그 외: 취소');
+      if(sel==='1'){ await adminAddRecord(); }
+      else if(sel==='2'){
+        if(!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
+        try{ const snap=await recordsCol.get(); const jobs=[]; snap.forEach(d=>jobs.push(d.ref.delete())); await Promise.all(jobs); alert('랭킹이 초기화되었습니다.'); renderLeaderboard(); }
+        catch(e){ console.error(e); alert('초기화 실패 — 콘솔을 확인하세요.'); }
+      }
+    };
 
     // ===== 이벤트 바인딩 =====
     document.getElementById('startBtn').onclick=startGame;
     document.getElementById('submitBtn').onclick=submitAnswer;
-    document.getElementById('passBtn').onclick=()=>{loseLife('패스! 정답: '+currentQ.blank)};
+    document.getElementById('passBtn').onclick=()=>{ loseLife('패스! 정답: '+currentQ.blank); };
     document.getElementById('rankBtn').onclick=showLeaderboard;
     document.getElementById('backStart').onclick=showStart;
 
-    // 운영자: Firestore 랭킹 초기화
-    document.getElementById('adminBtn').onclick=async()=>{
-      const pw=prompt('비밀번호 입력');
-      if(pw!=='eckc3004'){alert('비밀번호 오류');return;}
-      if(!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
-      try{const snap=await recordsCol.get();const jobs=[];snap.forEach(d=>jobs.push(d.ref.delete()));await Promise.all(jobs);alert('랭킹이 초기화되었습니다.');renderLeaderboard();}
-      catch(e){console.error(e);alert('초기화 실패. 콘솔을 확인해 주세요.');}
-    };
-
-// === 운영자 도우미 함수 ===
-function formatNow(){
-  const now=new Date();
-  return now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
-}
-
-async function adminAddRecord(){
-  const name = prompt("등록할 이름을 입력하세요 (예: 홍길동)");
-  if (!name) return;
-
-  const scoreStr = prompt("점수(정수)를 입력하세요 (예: 850)");
-  if (scoreStr === null) return;
-  const score = parseInt(scoreStr, 10);
-  if (Number.isNaN(score) || score < 0 || score > 100000) {
-    alert("점수 입력이 올바르지 않습니다."); return;
-  }
-
-  const timeInput = prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장\n예: 2025-09-27 21:03:00');
-  const time = (timeInput && timeInput.trim()) ? timeInput.trim() : formatNow();
-
-  try {
-    await recordsCol.add({
-      name, score, time,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    alert('랭킹에 등록했습니다 ✅');
-    renderLeaderboard();
-  } catch (e) {
-    console.error(e);
-    alert('등록 실패 😭 — 콘솔을 확인하세요.');
-  }
-}
-
-// === 운영자 버튼 (메뉴형) — 앞서 있던 초기화 전용 핸들러는 삭제! ===
-document.getElementById('adminBtn').onclick = async () => {
-  const pw = prompt('비밀번호 입력');
-  if (pw !== 'eckc3004') { alert('비밀번호 오류'); return; }
-
-  const sel = prompt(
-    '운영자 메뉴\n' +
-    '1: 랭킹 등록(수동 추가)\n' +
-    '2: 랭킹 초기화(전체 삭제)\n' +
-    '그 외: 취소'
-  );
-
-  if (sel === '1') {
-    await adminAddRecord();
-  } else if (sel === '2') {
-    if (!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
-    try {
-      const snap = await recordsCol.get();
-      const jobs = [];
-      snap.forEach(d => jobs.push(d.ref.delete()));
-      await Promise.all(jobs);
-      alert('랭킹이 초기화되었습니다.');
-      renderLeaderboard();
-    } catch (e) {
-      console.error(e);
-      alert('초기화 실패 — 콘솔을 확인하세요.');
-    }
-  } else {
-    // 취소
-  }
-};
-
-
-// 초기화
+    // 초기화
     attachAnswerListeners();
     showStart();
   </script>

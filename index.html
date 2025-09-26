@@ -273,8 +273,7 @@ async function adminAddRecord(){
   const scoreStr=prompt("점수(정수)를 입력하세요 (예: 850)");
   if(scoreStr===null) return; const score=parseInt(scoreStr,10);
   if(Number.isNaN(score)||score<0||score>100000){ alert("점수 입력이 올바르지 않습니다."); return; }
-  const timeInput=prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장
-예: 2025-09-27 21:03:00');
+const timeInput=prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장\n예: 2025-09-27 21:03:00');
   const time=(timeInput&&timeInput.trim())?timeInput.trim():formatNow();
   try{
     await recordsCol.add({ name:name, score:score, time:time, createdAt: firebase.firestore.FieldValue.serverTimestamp() });

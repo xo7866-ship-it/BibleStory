@@ -210,7 +210,6 @@
       fresh.inputMode='text';
       old.parentNode.replaceChild(fresh,old);
       el.answer=fresh; el.answer.value='';
-      attachAnswerListeners();
     }
 
     function attachAnswerListeners(){
@@ -265,19 +264,23 @@
       showLeaderboard();
     }
 
-    async function renderLeaderboard(){
-      try{
-        // 복합 인덱스 요구를 피하기 위해 score 단일 정렬만 사용하고, 동점은 클라이언트에서 createdAt으로 정렬
-        const snap=await recordsCol.orderBy('score','desc').limit(100).get();
-        const data=[]; snap.forEach(doc=> data.push(doc.data()));
-        data.sort((a,b)=>{
-          if((b.score||0)!==(a.score||0)) return (b.score||0)-(a.score||0);
-          const ta=a.createdAt?.toMillis?.()||0; const tb=b.createdAt?.toMillis?.()||0; return ta-tb;
-        });
-        const rows=[]; let rank=1; data.forEach(r=> rows.push(`<tr><td>${rank++}</td><td>${r.name||''}</td><td>${r.score||0}</td><td>${r.time||''}</td></tr>`));
-        el.lbBody.innerHTML= rows.join('') || `<tr><td colspan="4">아직 기록이 없습니다.</td></tr>`;
-      }catch(e){ console.error(e); el.lbBody.innerHTML=`<tr><td colspan="4">랭킹을 불러오지 못했어요.<br/>(${e.message||e})</td></tr>`; }
-    }
+ async function renderLeaderboard(){
+  try{
+    const snap = await recordsCol.orderBy('score','desc').limit(100).get();
+    const rows = [];
+    let rank = 1;
+    snap.forEach(doc=>{
+      const r = doc.data();
+      rows.push(
+        `<tr><td>${rank++}</td><td>${(r.name||'')}</td><td>${(r.score||0)}</td><td>${(r.time||'')}</td></tr>`
+      );
+    });
+    el.lbBody.innerHTML = rows.join('') || `<tr><td colspan="4">아직 기록이 없습니다.</td></tr>`;
+  }catch(e){
+    console.error(e);
+    el.lbBody.innerHTML = `<tr><td colspan="4">랭킹을 불러오지 못했어요.<br/>(${e.message||e})</td></tr>`;
+  }
+}
 
     // ===== 운영자 메뉴 =====
     function formatNow(){ const now=new Date(); return now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString(); }

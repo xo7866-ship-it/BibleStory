@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>창세기 성경 퀴즈</title>
+  <title>성경 퀴즈</title>
   <style>
     :root{
       --bg:#0b1020;--card:#121a34;--ink:#e8eeff;--muted:#9fb0ff;--accent:#7aa2ff;--good:#3ad39f;--bad:#ff6b6b;--warn:#ffb84d;
@@ -44,9 +44,9 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo">BS</div>
+        <div class="logo">BQ</div>
         <div>
-          <div style="font-weight:800">창세기 성경 퀴즈</div>
+          <div style="font-weight:800">성경 퀴즈</div>
           <div class="muted">빈칸 채우기 · 20초 타이머 · 정답 +30점</div>
         </div>
       </div>
@@ -103,98 +103,98 @@
       </div>
     </section>
 
-    <!-- 운영자 모드 버튼 -->
-    <button id="adminBtn" type="button">🐧</button>
+    <!-- 운영자 모드 버튼 (구석 펭귄) -->
+    <button id="adminBtn" type="button" title="운영자">🐧</button>
   </div>
 
+  <!-- Firebase SDK: 먼저 로드 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <script>
-      let QUESTIONS = [
-    {book:"창세기",ref:"1:1",before:"태초에",blank:"하나님",after:"이 천지를 창조하시니라",answers:["하나님"]},
-    {book:"창세기",ref:"1:3",before:"하나님이 이르시되",blank:"빛",after:" 있으라 하시매",answers:["빛"]},
-    {book:"창세기",ref:"2:7",before:"여호와 하나님이 흙으로 사람을 지으시고 그 코에",blank:"생기",after:"를 불어넣으시니",answers:["생기"]},
-    {book:"창세기",ref:"2:18",before:"사람이 혼자 사는 것이",blank:"좋지 아니하니",after:"",answers:["좋지 아니하니"]},
-    {book:"창세기",ref:"2:24",before:"둘이",blank:"한 몸",after:"을 이루리라",answers:["한 몸","한몸"]},
-    {book:"창세기",ref:"3:1",before:"",blank:"뱀",after:"은 가장 간교하니라",answers:["뱀"]},
-    {book:"창세기",ref:"3:6",before:"여자가 그",blank:"열매",after:"를 따먹고",answers:["열매"]},
-    {book:"창세기",ref:"3:19",before:"너는 흙이니",blank:"흙으로 돌아갈 것이니라",after:"",answers:["흙으로 돌아갈 것이니라","흙으로돌아갈것이니라"]},
-    {book:"창세기",ref:"4:4",before:"여호와께서 아벨과 그의",blank:"제물",after:"은 열납하셨으나",answers:["제물"]},
-    {book:"창세기",ref:"4:9",before:"여호와께서 가인에게 이르시되 네",blank:"아우",after:" 아벨이 어디 있느냐",answers:["아우","동생"]},
-    {book:"창세기",ref:"6:8",before:"그러나",blank:"노아",after:"는 은혜를 입었더라",answers:["노아"]},
-    {book:"창세기",ref:"7:1",before:"너와 네 온 집은",blank:"방주",after:"로 들어가라",answers:["방주"]},
-    {book:"창세기",ref:"7:17",before:"",blank:"홍수",after:"가 사십 주야 동안",answers:["홍수"]},
-    {book:"창세기",ref:"8:4",before:"방주는",blank:"아라랏산",after:"에 머물렀으며",answers:["아라랏산"]},
-    {book:"창세기",ref:"9:13",before:"내",blank:"무지개",after:"를 구름 속에 두었나니",answers:["무지개"]},
-    {book:"창세기",ref:"12:1",before:"여호와께서",blank:"아브람",after:"에게 이르시되",answers:["아브람"]},
-    {book:"창세기",ref:"12:2",before:"너로 큰",blank:"민족",after:"을 이루고",answers:["민족"]},
-    {book:"창세기",ref:"15:6",before:"아브람이 여호와를",blank:"믿으니",after:" 그를 의로 여기셨다",answers:["믿으니","믿었다"]},
-    {book:"창세기",ref:"17:5",before:"네 이름을 아브람이 아니라",blank:"아브라함",after:"이라 하리니",answers:["아브라함"]},
-    {book:"창세기",ref:"21:3",before:"아브라함이 사라에게서 낳은 아들의 이름을",blank:"이삭",after:"이라 하였고",answers:["이삭"]},
-    {book:"창세기",ref:"22:2",before:"네 아들 네 사랑하는 독자",blank:"이삭",after:"을 번제로 드리라",answers:["이삭"]},
-    {book:"창세기",ref:"22:14",before:"아브라함이 그곳 이름을",blank:"여호와 이레",after:"라 하였더라",answers:["여호와 이레","여호와이레"]},
-    {book:"창세기",ref:"24:15",before:"리브가가 물동이를 어깨에 메고",blank:"나오더라",after:"",answers:["나오더라"]},
-    {book:"창세기",ref:"25:23",before:"큰 자는",blank:"작은 자를 섬기리라",after:"",answers:["작은 자를 섬기리라","작은자"]},
-    {book:"창세기",ref:"26:12",before:"이삭이 그 땅에서 농사하여",blank:"백배",after:"나 얻었고",answers:["백배","백배나"]},
-    {book:"창세기",ref:"27:29",before:"만민이 너를",blank:"섬기고",after:" 열국이 네게 굴복하리니",answers:["섬기고"]},
-    {book:"창세기",ref:"28:12",before:"꿈에 본즉 사닥다리가",blank:"하늘에 닿았고",after:"",answers:["하늘에 닿았고","사닥다리"]},
-    {book:"창세기",ref:"28:17",before:"이것은",blank:"하나님의 집",after:"이요 이는 하늘의 문이로다",answers:["하나님의 집","하나님집"]},
-    {book:"창세기",ref:"29:20",before:"야곱이 라헬을 사랑하므로 칠 년을",blank:"수일같이",after:"여겼더라",answers:["수일같이","며칠같이"]},
-    {book:"창세기",ref:"30:22",before:"하나님이 라헬을",blank:"생각하신지라",after:"",answers:["생각하신지라"]},
-    {book:"창세기",ref:"32:28",before:"네 이름을 야곱이 아니요",blank:"이스라엘",after:"이라 하리라",answers:["이스라엘"]},
-    {book:"창세기",ref:"33:4",before:"에서가 달려와서 야곱을",blank:"안고 입맞추며 울었더라",after:"",answers:["안고 입맞추며 울었더라","안고 울었더라"]},
-    {book:"창세기",ref:"35:19",before:"라헬이 죽으매 그를",blank:"베들레헴 길",after:"에 장사하였더라",answers:["베들레헴 길","베들레헴"]},
-    {book:"창세기",ref:"37:3",before:"이스라엘이",blank:"요셉",after:"을 더 사랑하므로",answers:["요셉"]},
-    {book:"창세기",ref:"37:28",before:"형들이 요셉을 은",blank:"스무 개",after:"에 팔았다",answers:["스무 개","스무개"]},
-    {book:"창세기",ref:"39:2",before:"여호와께서 요셉과 함께 하시므로 그가",blank:"형통한 자",after:"가 되었다",answers:["형통한 자","형통"]},
-    {book:"창세기",ref:"41:16",before:"요셉이 바로에게 대답하되",blank:"하나님이 평안한 대답을",after:"하시리이다",answers:["하나님이 평안한 대답을","하나님"]},
-    {book:"창세기",ref:"41:52",before:"차자의 이름을",blank:"에브라임",after:"이라 하였으니",answers:["에브라임"]},
-    {book:"창세기",ref:"45:5",before:"하나님이 생명을",blank:"구원하시려고",after:" 나를 먼저 보내셨나이다",answers:["구원하시려고","구원"]},
-    {book:"창세기",ref:"50:20",before:"너희는 나를 해하려 하였으나 하나님은 그것을",blank:"선으로 바꾸사",after:"",answers:["선으로 바꾸사","선"]},
-    {book:"창세기",ref:"1:31",before:"하나님이 지으신 모든 것을 보시니",blank:"심히 좋았더라",after:"",answers:["심히 좋았더라","심히좋았더라"]},
-    {book:"창세기",ref:"3:15",before:"여자의 후손은 네 머리를",blank:"상하게 할 것이요",after:"",answers:["상하게 할 것이요","상하게"]},
-    {book:"창세기",ref:"4:26",before:"셋은 아들을 낳고 그의 이름을",blank:"에노스",after:"라 하였으며",answers:["에노스"]},
-    {book:"창세기",ref:"5:24",before:"에녹이 하나님과 동행하더니",blank:"하나님이 데려가시므로",after:"",answers:["하나님이 데려가시므로","데려가시므로"]},
-    {book:"창세기",ref:"6:5",before:"사람의",blank:"죄악",after:"이 가득함을 보시고",answers:["죄악"]},
-    {book:"창세기",ref:"6:22",before:"노아가 하나님이 명하신 대로",blank:"다 준행하였더라",after:"",answers:["다 준행하였더라","준행하였더라"]},
-    {book:"창세기",ref:"8:11",before:"비둘기가 감람나무 새",blank:"잎사귀",after:"를 물고 왔더라",answers:["잎사귀","잎새"]},
-    {book:"창세기",ref:"9:6",before:"사람의",blank:"피를 흘리면",after:" 사람이 그 피를 흘리리니",answers:["피를 흘리면","피"]},
-    {book:"창세기",ref:"11:9",before:"그 성 이름을",blank:"바벨",after:"이라 하였더라",answers:["바벨"]},
-    {book:"창세기",ref:"13:8",before:"아브람이 롯에게 이르되 우리는",blank:"한 친족",after:"이라 다투지 말자",answers:["한 친족","친족"]},
-    {book:"창세기",ref:"15:1",before:"나는 네",blank:"방패요",after:" 너의 큰 상급이니라",answers:["방패요","방패"]},
-    {book:"창세기",ref:"17:19",before:"네 아내 사라가",blank:"아들을 낳으리니",after:"",answers:["아들을 낳으리니","아들을낳으리니"]},
-    {book:"창세기",ref:"18:14",before:"여호와께 능하지 못한 일이 있겠느냐",blank:"사라에게 아들이 있으리라",after:"",answers:["사라에게 아들이 있으리라","사라에게 아들이"]},
-    {book:"창세기",ref:"19:26",before:"롯의 아내는 뒤를 돌아보았으므로",blank:"소금 기둥",after:"이 되었더라",answers:["소금 기둥","소금기둥"]},
-    {book:"창세기",ref:"21:6",before:"사라가 이르되 하나님이 나를",blank:"웃게 하셨다",after:"",answers:["웃게 하셨다","웃게"]},
-    {book:"창세기",ref:"25:34",before:"에서가 장자의",blank:"명분을 경홀히",after:"여겼더라",answers:["명분을 경홀히","장자명분"]},
-    {book:"창세기",ref:"28:15",before:"내가 너와 함께 있어",blank:"너를 떠나지 아니하리라",after:"",answers:["너를 떠나지 아니하리라","떠나지 아니하리라"]},
-    {book:"창세기",ref:"33:20",before:"야곱이 그곳에 제단을 쌓고 그 이름을",blank:"엘엘로헤이스라엘",after:"이라 불렀더라",answers:["엘엘로헤이스라엘","엘 엘로헤 이스라엘"]},
-    {book:"창세기",ref:"35:3",before:"우리를 환난에서 응답하신 하나님께",blank:"예배하자",after:"",answers:["예배하자","제단을 쌓자"]},
-    {book:"창세기",ref:"47:9",before:"내 나그네 길의 세월이",blank:"백삼십 년",after:"이니이다",answers:["백삼십 년","백삼십년"]},
-    {book:"창세기",ref:"2:2",before:"하나님이 그가 하시던 일을",blank:"일곱째 날에 마치시니",after:"",answers:["일곱째 날에 마치시니","일곱째날에 마치시니"]},
-    {book:"창세기",ref:"9:1",before:"하나님이 노아와 그 아들들에게 이르시되",blank:"생육하고 번성하여",after:" 땅에 충만하라",answers:["생육하고 번성하여","생육하고 번성하라"]},
-    {book:"창세기",ref:"11:7",before:"자, 우리가 내려가서 그들의",blank:"언어를 혼잡하게 하자",after:"",answers:["언어를 혼잡하게 하자","언어혼잡"]},
-    {book:"창세기",ref:"12:3",before:"땅의 모든 족속이 너로 말미암아",blank:"복을 얻을 것이라",after:"",answers:["복을 얻을 것이라","복"]},
-    {book:"창세기",ref:"13:14",before:"동서남북을 바라보라 이 땅을 네",blank:"자손에게 주리니",after:"",answers:["자손에게 주리니","자손에게"]},
-    {book:"창세기",ref:"14:20",before:"너의 대적을 네 손에 붙이신",blank:"지극히 높으신 하나님",after:"을 찬송할지로다",answers:["지극히 높으신 하나님","지극히높으신하나님"]},
-    {book:"창세기",ref:"18:2",before:"아브라함이 눈을 들어 본즉",blank:"세 사람이 서 있는지라",after:"",answers:["세 사람이 서 있는지라","세사람"]},
-    {book:"창세기",ref:"18:18",before:"아브라함은 강대한",blank:"나라가 되고",after:"",answers:["나라가 되고","나라"]},
-    {book:"창세기",ref:"19:17",before:"생명을 보전하라 뒤를 돌아보지 말고",blank:"산으로 도망하라",after:"",answers:["산으로 도망하라","산으로"]},
-    {book:"창세기",ref:"21:10",before:"이 여종과 그 아들을",blank:"내쫓으라",after:"",answers:["내쫓으라","내어쫓으라"]},
-    {book:"창세기",ref:"21:12",before:"네 씨는",blank:"이삭으로 말미암으리라",after:"",answers:["이삭으로 말미암으리라","이삭"]},
-    {book:"창세기",ref:"22:18",before:"네 씨로 말미암아 천하 만민이",blank:"복을 받으리라",after:"",answers:["복을 받으리라","복"]},
-    {book:"창세기",ref:"24:12",before:"아브라함의 하나님 여호와여 오늘 나로",blank:"순조롭게 만나게 하옵소서",after:"",answers:["순조롭게 만나게 하옵소서","순조롭게"]},
-    {book:"창세기",ref:"24:27",before:"여호와께서 나를",blank:"인도하사",after:" 내 주인의 동생 집에 이르게 하셨다",answers:["인도하사","인도"]},
-    {book:"창세기",ref:"24:60",before:"우리 누이여 너는 천만인의",blank:"어머니가 될지어다",after:"",answers:["어머니가 될지어다","어머니"]},
-    {book:"창세기",ref:"26:3",before:"내가 너와 함께 있어 네게",blank:"복을 주리라",after:"",answers:["복을 주리라","복"]},
-    {book:"창세기",ref:"26:24",before:"두려워하지 말라 내가 너와 함께 있어 네게",blank:"복을 주며",after:"",answers:["복을 주며","복"]},
-    {book:"창세기",ref:"29:28",before:"라반이 딸",blank:"라헬",after:"도 야곱에게 아내로 주었더라",answers:["라헬"]},
-    {book:"창세기",ref:"30:27",before:"여호와께서 네게",blank:"복을 주신 줄을",after:" 내가 깨달았다",answers:["복을 주신 줄을","복"]},
-    {book:"창세기",ref:"31:49",before:"그 이름을",blank:"미스바",after:"라 하였더라",answers:["미스바"]}
-  ];
+    const firebaseConfig = {
+  apiKey: "AIzaSyAnit284Kj3Rv3hXphywKMW-S1jg7TcV_8",
+  authDomain: "biblestory-d636c.firebaseapp.com",
+  projectId: "biblestory-d636c",
+  storageBucket: "biblestory-d636c.appspot.com",
+  messagingSenderId: "823812059117",
+  appId: "1:823812059117:web:777a2266b354945780c1e4",
+  measurementId: "G-5Z4KX2XPP8"
+};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const recordsCol = db.collection('records');
+
+    let QUESTIONS = [
+   {book:"출애굽기",ref:"20:12",before:"네 부모를",blank:"공경하라",after:"",answers:["공경하라","공경"]},
+  {book:"에베소서",ref:"6:1",before:"자녀들아 너희",blank:"부모에게 순종하라",after:"",answers:["부모에게 순종하라","부모"]},
+  {book:"시편",ref:"119:105",before:"주의 말씀은 내 발에",blank:"등이요",after:" 내 길에 빛이니이다",answers:["등이요","등"]},
+  {book:"마가복음",ref:"10:14",before:"어린아이들이 내게 오는 것을",blank:"용납하라",after:"",answers:["용납하라","허락하라"]},
+  {book:"요한일서",ref:"4:19",before:"우리가 사랑함은 그가 먼저 우리를",blank:"사랑하셨음이라",after:"",answers:["사랑하셨음이라","사랑하셨다"]},
+  {book:"빌립보서",ref:"4:4",before:"주 안에서 항상",blank:"기뻐하라",after:"",answers:["기뻐하라","기뻐"]},
+  {book:"잠언",ref:"3:5",before:"너는 마음을 다하여 여호와를",blank:"의뢰하고",after:"",answers:["의뢰하고","신뢰하고"]},
+  {book:"잠언",ref:"22:6",before:"마땅히 행할 길을",blank:"아이에게 가르치라",after:"",answers:["아이에게 가르치라","아이"]},
+  {book:"시편",ref:"150:6",before:"호흡이 있는 자마다",blank:"여호와를 찬양할지어다",after:"",answers:["여호와를 찬양할지어다","찬양할지어다"]},
+  {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요",blank:"진리요 생명이니",after:"",answers:["진리요 생명이니","진리요 생명"]},
+  {book:"창세기",ref:"1:1",before:"태초에 하나님이 천지를",blank:"창조하시니라",after:"",answers:["창조하시니라","창조"]},
+  {book:"시편",ref:"121:2",before:"나의 도움이 천지를 지으신",blank:"여호와에게서로다",after:"",answers:["여호와에게서로다","여호와"]},
+  {book:"마태복음",ref:"7:7",before:"구하라 그러면 너희에게",blank:"주실 것이요",after:"",answers:["주실 것이요","주신다"]},
+  {book:"데살로니가전서",ref:"5:17",before:"쉬지 말고",blank:"기도하라",after:"",answers:["기도하라","기도"]},
+  {book:"데살로니가전서",ref:"5:18",before:"범사에",blank:"감사하라",after:"",answers:["감사하라","감사"]},
+  {book:"요한계시록",ref:"22:20",before:"주 예수여",blank:"오시옵소서",after:"",answers:["오시옵소서","오시옵소서 아멘"]}
+];
+QUESTIONS.push(
+  // --- 1~20 ---
+  {book:"창세기",ref:"1:1",before:"태초에",blank:"하나님",after:"이 천지를 창조하시니라",answers:["하나님"]},
+  {book:"시편",ref:"23:1",before:"여호와는 나의",blank:"목자",after:"시니 내가 부족함이 없으리로다",answers:["목자"]},
+  {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요 진리요",blank:"생명",after:"이니",answers:["생명"]},
+  {book:"마태복음",ref:"5:9",before:"화평하게 하는 자는 하나님의",blank:"아들",after:"이라 일컬음을 받을 것이요",answers:["아들"]},
+  {book:"잠언",ref:"1:7",before:"여호와를 경외하는 것이",blank:"지식",after:"의 근본이거늘",answers:["지식"]},
+  {book:"이사야",ref:"9:6",before:"이는 한 아기가 우리에게 났고 한",blank:"아들",after:"을 우리에게 주신 바 되었는데",answers:["아들"]},
+  {book:"요한일서",ref:"4:8",before:"사랑하지 아니하는 자는",blank:"하나님",after:"을 알지 못하나니",answers:["하나님"]},
+  {book:"마태복음",ref:"6:11",before:"오늘 우리에게 일용할",blank:"양식",after:"을 주옵시고",answers:["양식"]},
+  {book:"출애굽기",ref:"20:16",before:"너는 네 이웃에 대하여",blank:"거짓",after:"증거하지 말라",answers:["거짓"]},
+  {book:"마태복음",ref:"22:39",before:"네",blank:"이웃",after:"을 네 자신과 같이 사랑하라 하셨으니",answers:["이웃"]},
+  {book:"요한복음",ref:"6:35",before:"예수께서 이르시되 나는 생명의",blank:"떡",after:"이니",answers:["떡"]},
+  {book:"요한계시록",ref:"22:13",before:"나는 알파와",blank:"오메가",after:"요 처음과 마지막이요 시작과 끝이라",answers:["오메가"]},
+  {book:"시편",ref:"119:105",before:"주의 말씀은 내 발에",blank:"등",after:"이요 내 길에 빛이니이다",answers:["등"]},
+  {book:"요한복음",ref:"11:25",before:"예수께서 이르시되 나는 부활이요",blank:"생명",after:"이니",answers:["생명"]},
+  {book:"갈라디아서",ref:"5:22",before:"오직 성령의",blank:"열매",after:"는 사랑과 희락과 화평이요",answers:["열매"]},
+  {book:"마태복음",ref:"7:7",before:"구하라 그리하면 너희에게",blank:"주실",after:"것이요",answers:["주실","준다"]},
+  {book:"고린도전서",ref:"13:13",before:"그런즉 믿음 소망",blank:"사랑",after:"이 항상 있을 것인데",answers:["사랑"]},
+  {book:"빌립보서",ref:"4:4",before:"주 안에서 항상",blank:"기뻐",after:"하라",answers:["기뻐","기뻐하라"]},
+
+  // --- 21~40 (새로 추가, 중복 참고 절 제거) ---
+  {book:"요한복음",ref:"3:16",before:"하나님이 세상을 이처럼 사랑하사",blank:"독생자",after:"를 주셨으니",answers:["독생자"]},
+  {book:"마태복음",ref:"5:14",before:"너희는 세상의",blank:"빛",after:"이라",answers:["빛"]},
+  {book:"마태복음",ref:"6:33",before:"그런즉 너희는 먼저 그의 나라와 그의",blank:"의",after:"를 구하라",answers:["의"]},
+  {book:"출애굽기",ref:"20:12",before:"네",blank:"부모",after:"를 공경하라",answers:["부모"]},
+  {book:"에베소서",ref:"6:1",before:"자녀들아 너희",blank:"부모",after:"에게 순종하라",answers:["부모"]},
+  {book:"마가복음",ref:"10:14",before:"어린",blank:"아이",after:"들이 내게 오는 것을 용납하라",answers:["아이","어린이"]},
+  {book:"요한일서",ref:"4:19",before:"우리가",blank:"사랑",after:"함은 그가 먼저 우리를 사랑하셨음이라",answers:["사랑"]},
+  {book:"잠언",ref:"3:5",before:"너는 마음을 다하여 여호와를",blank:"의뢰",after:"하고",answers:["의뢰","신뢰"]},
+  {book:"잠언",ref:"22:6",before:"마땅히 행할 길을",blank:"아이",after:"에게 가르치라",answers:["아이"]},
+  {book:"시편",ref:"150:6",before:"호흡이 있는 자마다 여호와를",blank:"찬양",after:"할지어다",answers:["찬양"]},
+  {book:"시편",ref:"121:2",before:"나의 도움이 천지를 지으신",blank:"여호와",after:"에게서로다",answers:["여호와"]},
+  {book:"데살로니가전서",ref:"5:17",before:"쉬지 말고",blank:"기도",after:"하라",answers:["기도"]},
+  {book:"데살로니가전서",ref:"5:18",before:"범사에",blank:"감사",after:"하라",answers:["감사"]},
+  {book:"요한계시록",ref:"22:20",before:"주 예수여",blank:"오시옵소서",after:"",answers:["오시옵소서"]},
+  {book:"요한복음",ref:"8:12",before:"예수께서 이르시되 나는 세상의",blank:"빛",after:"이니",answers:["빛"]},
+  {book:"사도행전",ref:"16:31",before:"주 예수를",blank:"믿으라",after:" 그리하면 너와 네 집이 구원을 받으리라",answers:["믿으라","믿어라"]},
+  {book:"누가복음",ref:"6:31",before:"남에게 대접을 받고자 하는 대로 너희도",blank:"대접",after:"하라",answers:["대접"]},
+  {book:"누가복음",ref:"19:10",before:"인자가 온 것은 잃어버린 자를 찾아",blank:"구원",after:"하려 함이니라",answers:["구원"]},
+  {book:"고린도전서",ref:"10:31",before:"무엇을 하든지 다 하나님의",blank:"영광",after:"을 위하여 하라",answers:["영광"]},
+  {book:"빌립보서",ref:"4:6",before:"아무 것도",blank:"염려",after:"하지 말고",answers:["염려"]}
+);
 
 
-    const TARGET=1000, POINT=30, LIMIT=20, MAX_LIVES=10;
+    // ===== 게임 설정 상수 =====
+    const TARGET=1000, POINT=50, LIMIT=20, MAX_LIVES=10;
+
+    // ===== 상태 변수 =====
     let playerName='게스트',score=0,idx=0,left=LIMIT,order=[],timer=null,currentQ=null,lives=MAX_LIVES,locked=false;
 
+    // ===== 엘리먼트 캐시 =====
     const el={
       start:document.getElementById('start'),quiz:document.getElementById('quiz'),leaderboard:document.getElementById('leaderboard'),
       nameInput:document.getElementById('nameInput'),playerBadge:document.getElementById('playerBadge'),score:document.getElementById('score'),
@@ -204,144 +204,84 @@
       scoreBoard:document.getElementById('scoreBoard')
     };
 
-    function shuffle(array){
-      for(let i=array.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [array[i],array[j]]=[array[j],array[i]];
-      }
-    }
+    // ===== 유틸 =====
+    function shuffle(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
+    function norm(s){s=(s||'').toString().toLowerCase();s=s.split(' ').join('');const rm=['[',']','(',')','{','}','\'','.',',',':',';','!','?','·','…','—','–','-','"'];for(let i=0;i<rm.length;i++){s=s.split(rm[i]).join('');}return s;}
 
-    function showStart(){
-      clearInterval(timer);
-      el.start.style.display='grid';
-      el.quiz.style.display='none';
-      el.leaderboard.style.display='none';
-      el.scoreBoard.style.display='none';
-      el.lives.textContent = MAX_LIVES;
-    }
-    function showQuiz(){
-      el.start.style.display='none';
-      el.quiz.style.display='block';
-      el.leaderboard.style.display='none';
-      el.scoreBoard.style.display='flex';
-    }
-    function showLeaderboard(){
-      clearInterval(timer);
-      el.start.style.display='none';
-      el.quiz.style.display='none';
-      el.leaderboard.style.display='block';
-      el.scoreBoard.style.display='none';
-      renderLeaderboard();
-    }
+    // ===== 화면 전환 =====
+    function showStart(){clearInterval(timer);el.start.style.display='grid';el.quiz.style.display='none';el.leaderboard.style.display='none';el.scoreBoard.style.display='none';el.lives.textContent=MAX_LIVES;}
+    function showQuiz(){el.start.style.display='none';el.quiz.style.display='block';el.leaderboard.style.display='none';el.scoreBoard.style.display='flex';}
+    async function showLeaderboard(){clearInterval(timer);el.start.style.display='none';el.quiz.style.display='none';el.leaderboard.style.display='block';el.scoreBoard.style.display='none';await renderLeaderboard();}
 
+    // ===== 게임 로직 =====
     function startGame(){
       playerName=el.nameInput.value||'게스트';el.playerBadge.textContent=playerName;
-      score=0;idx=0;lives=MAX_LIVES;el.lives.textContent=lives;
-      order=[...Array(QUESTIONS.length).keys()];
-      shuffle(order);
-      showQuiz();nextQuestion();
+      score=0;idx=0;lives=MAX_LIVES;el.lives.textContent=lives;el.score.textContent=score;el.qIndex.textContent=0;
+      order=[...Array(QUESTIONS.length).keys()];shuffle(order);showQuiz();nextQuestion();
     }
+
     function nextQuestion(){
       if(lives<=0){endGame(false);return;}
-      if(order.length===0){order=[...Array(QUESTIONS.length).keys()];shuffle(order);}
+      if(score>=TARGET){endGame(true);return;}
+      if(order.length===0){order=[...Array(QUESTIONS.length).keys()];shuffle(order);} // 무한 랜덤 로테이션
       currentQ=QUESTIONS[order.shift()];idx++;
       el.qIndex.textContent=idx;el.ref.textContent=`${currentQ.book} ${currentQ.ref}`;
-      el.verse.innerHTML = `${currentQ.before} <span class="blank">_____</span> ${currentQ.after}`;
-      resetAnswerInput();
-      locked = false;
-      setTimeout(function(){ try{ el.answer.focus(); }catch(e){} }, 0);
-      runTimer();
+      el.verse.innerHTML=`${currentQ.before} <span class="blank">_____</span> ${currentQ.after}`;
+      resetAnswerInput();locked=false;setTimeout(()=>{try{el.answer.focus();}catch(e){}},0);runTimer();
     }
+
     function runTimer(){left=LIMIT;el.time.textContent=left;el.bar.style.width='100%';clearInterval(timer);timer=setInterval(()=>{left--;el.time.textContent=left;el.bar.style.width=(left/LIMIT*100)+'%';if(left<0){clearInterval(timer);loseLife(`⏰ 시간초과! 정답: ${currentQ.blank}`);}},1000);}
-    function submitAnswer(){
-      if(locked) return; locked=true;
-      const ans=norm(el.answer.value.trim());
-      const accepts=(currentQ.answers&&currentQ.answers.length? currentQ.answers : [currentQ.blank]).map(norm);
-      if(accepts.includes(ans)){ 
-        score+=POINT;el.score.textContent=score;feedback(true,'정답!');
-      } else {
-        loseLife('오답! 정답:'+currentQ.blank);
-        return;
-      }
-      setTimeout(nextQuestion,800);
-    }
-    function loseLife(msg){
-      locked=true;
-      lives--;el.lives.textContent=lives;feedback(false,msg);
-      if(lives<=0){endGame(false);} else {setTimeout(nextQuestion,800);}
-    }
+
+    function isCorrectInput(){if(!currentQ)return false;const ans=norm(el.answer.value);const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);return accepts.includes(ans);}    
+
+    function submitAnswer(){if(locked)return;locked=true;const ans=norm(el.answer.value.trim());const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);if(accepts.includes(ans)){score+=POINT;el.score.textContent=score;feedback(true,'정답!');setTimeout(nextQuestion,650);}else{loseLife('오답! 정답: '+currentQ.blank);}}
+
+    function loseLife(msg){locked=true;lives--;el.lives.textContent=lives;feedback(false,msg);if(lives<=0){endGame(false);}else{setTimeout(nextQuestion,800);}}
+
     function feedback(ok,msg){el.feedback.style.display='block';el.feedback.textContent=msg;el.feedback.className='result '+(ok?'good':'bad');}
 
-    function endGame(success=true){
-      if(success){
+    // 입력칸을 항상 새로 생성하여 이전 값 잔존 제거
+    function resetAnswerInput(){const old=document.getElementById('answer');const fresh=old.cloneNode(false);fresh.id='answer';fresh.className=old.className;fresh.type='text';fresh.placeholder=old.placeholder;fresh.autocomplete='off';fresh.autocapitalize='off';fresh.autocorrect='off';fresh.spellcheck=false;fresh.inputMode='text';old.parentNode.replaceChild(fresh,old);el.answer=fresh;el.answer.value='';attachAnswerListeners();}
+
+    function attachAnswerListeners(){el.answer.addEventListener('keydown',e=>{if(e.key==='Enter'){submitAnswer();}});el.answer.addEventListener('input',()=>{if(!locked&&isCorrectInput()){submitAnswer();}});}    
+
+    // ===== 랭킹 저장/조회 (Firebase) =====
+    async function endGame(success=true){
+      if(success && lives>0){
         const now=new Date();
         const finished= now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
-        let records=JSON.parse(localStorage.getItem('records')||'[]');
-        records.push({name:playerName,score:score,time:finished});
-        localStorage.setItem('records',JSON.stringify(records));
+        try{await recordsCol.add({name:playerName||'게스트',score:score,time:finished,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+        catch(e){console.error('saveRecord failed:',e);alert('기록 저장 중 오류가 발생했어요 😭');}
       }
       showLeaderboard();
     }
 
-    function renderLeaderboard(){
-      let records=JSON.parse(localStorage.getItem('records')||'[]');
-      records.sort((a,b)=> b.score-a.score);
-      el.lbBody.innerHTML=records.map((r,i)=>`<tr><td>${i+1}</td><td>${r.name}</td><td>${r.score}</td><td>${r.time}</td></tr>`).join('');
+    async function renderLeaderboard(){
+      try{
+        const snap=await recordsCol.orderBy('score','desc').orderBy('createdAt','asc').limit(100).get();
+        const rows=[];let rank=1;snap.forEach(doc=>{const r=doc.data();rows.push(`<tr><td>${rank++}</td><td>${(r.name||'')}</td><td>${(r.score||0)}</td><td>${(r.time||'')}</td></tr>`);});
+        el.lbBody.innerHTML=rows.join('')||`<tr><td colspan="4">아직 기록이 없습니다.</td></tr>`;
+      }catch(e){console.error(e);el.lbBody.innerHTML=`<tr><td colspan="4">랭킹을 불러오지 못했어요.</td></tr>`;}
     }
 
+    // ===== 이벤트 바인딩 =====
     document.getElementById('startBtn').onclick=startGame;
     document.getElementById('submitBtn').onclick=submitAnswer;
-    function norm(s){
-      s = (s||'').toString().toLowerCase();
-      s = s.split(' ').join('');
-      var rm = ['[',']','(',')','{','}','\'','.',',',':',';','!','?','·','…','—','–','-','"'];
-      for (var i=0;i<rm.length;i++){ s = s.split(rm[i]).join(''); }
-      return s;
-    }
-    function isCorrectInput(){
-      if(!currentQ) return false;
-      var ans = norm(document.getElementById('answer').value);
-      var accepts = (currentQ.answers && currentQ.answers.length ? currentQ.answers : [currentQ.blank]).map(norm);
-      return accepts.includes(ans);
-    }
-    function attachAnswerListeners(){
-      el.answer.addEventListener('keydown', function(e){ if(e.key==='Enter'){ submitAnswer(); }});
-      el.answer.addEventListener('input', function(){ if(!locked && isCorrectInput()){ submitAnswer(); }});
-    }
-    function resetAnswerInput(){
-      var old = document.getElementById('answer');
-      var fresh = old.cloneNode(false);
-      fresh.id = 'answer';
-      fresh.className = old.className;
-      fresh.type = old.type || 'text';
-      fresh.placeholder = old.placeholder || '';
-      fresh.autocomplete = 'off';
-      fresh.autocapitalize = 'off';
-      fresh.autocorrect = 'off';
-      fresh.spellcheck = false;
-      fresh.inputMode = 'text';
-      old.parentNode.replaceChild(fresh, old);
-      el.answer = fresh;
-      el.answer.value = '';
-      attachAnswerListeners();
-    }
-    attachAnswerListeners();
-    document.getElementById('passBtn').onclick=()=>{loseLife('패스! 정답:'+currentQ.blank)};
+    document.getElementById('passBtn').onclick=()=>{loseLife('패스! 정답: '+currentQ.blank)};
     document.getElementById('rankBtn').onclick=showLeaderboard;
     document.getElementById('backStart').onclick=showStart;
 
-    // 운영자 모드 버튼
-    document.getElementById('adminBtn').onclick=()=>{
+    // 운영자: Firestore 랭킹 초기화
+    document.getElementById('adminBtn').onclick=async()=>{
       const pw=prompt('비밀번호 입력');
-      if(pw==='eckc3004'){
-        if(confirm('랭킹을 초기화하시겠습니까?')){
-          localStorage.removeItem('records');
-          alert('랭킹이 초기화되었습니다.');
-          renderLeaderboard();
-        }
-      } else {alert('비밀번호 오류');}
+      if(pw!=='eckc3004'){alert('비밀번호 오류');return;}
+      if(!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
+      try{const snap=await recordsCol.get();const jobs=[];snap.forEach(d=>jobs.push(d.ref.delete()));await Promise.all(jobs);alert('랭킹이 초기화되었습니다.');renderLeaderboard();}
+      catch(e){console.error(e);alert('초기화 실패. 콘솔을 확인해 주세요.');}
     };
 
+    // 초기화
+    attachAnswerListeners();
     showStart();
   </script>
 </body>

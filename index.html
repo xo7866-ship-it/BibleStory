@@ -124,8 +124,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const recordsCol = db.collection('records');
-
-    let QUESTIONS = [
+       let QUESTIONS = [
    {book:"출애굽기",ref:"20:12",before:"네 부모를",blank:"공경하라",after:"",answers:["공경하라","공경"]},
   {book:"에베소서",ref:"6:1",before:"자녀들아 너희",blank:"부모에게 순종하라",after:"",answers:["부모에게 순종하라","부모"]},
   {book:"시편",ref:"119:105",before:"주의 말씀은 내 발에",blank:"등이요",after:" 내 길에 빛이니이다",answers:["등이요","등"]},
@@ -280,7 +279,48 @@ QUESTIONS.push(
       catch(e){console.error(e);alert('초기화 실패. 콘솔을 확인해 주세요.');}
     };
 
-    // 초기화
+    // === 운영자 도우미 함수 ===
+function formatNow(){
+  const now=new Date();
+  return now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,'0')+"-"+String(now.getDate()).padStart(2,'0')+" "+now.toLocaleTimeString();
+}
+async function adminAddRecord(){
+  const name=prompt("등록할 이름을 입력하세요 (예: 홍길동)");
+  if(!name) return;
+  const scoreStr=prompt("점수(정수)를 입력하세요 (예: 850)");
+  if(scoreStr===null) return; const score=parseInt(scoreStr,10);
+  if(Number.isNaN(score)||score<0||score>100000){ alert("점수 입력이 올바르지 않습니다."); return; }
+  const timeInput=prompt('완료 시간(선택 입력) — 미입력 시 현재 시간으로 저장
+예: 2025-09-27 21:03:00');
+  const time=(timeInput&&timeInput.trim())?timeInput.trim():formatNow();
+  try{
+    await recordsCol.add({ name:name, score:score, time:time, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert('랭킹에 등록했습니다 ✅');
+    renderLeaderboard();
+  }catch(e){ console.error(e); alert('등록 실패 😭 — 콘솔을 확인하세요.'); }
+}
+// === 운영자 버튼 (신규 메뉴) ===
+document.getElementById('adminBtn').onclick=async()=>{
+  const pw=prompt('비밀번호 입력');
+  if(pw!=='eckc3004'){ alert('비밀번호 오류'); return; }
+  const sel=prompt('운영자 메뉴
+1: 랭킹 등록(수동 추가)
+2: 랭킹 초기화(전체 삭제)
+그 외: 취소');
+  if(sel==='1'){
+    await adminAddRecord();
+  }else if(sel==='2'){
+    if(!confirm('정말 랭킹을 초기화하시겠습니까? (되돌릴 수 없음)')) return;
+    try{
+      const snap=await recordsCol.get(); const jobs=[]; snap.forEach(d=>jobs.push(d.ref.delete()));
+      await Promise.all(jobs);
+      alert('랭킹이 초기화되었습니다.');
+      renderLeaderboard();
+    }catch(e){ console.error(e); alert('초기화 실패 — 콘솔을 확인하세요.'); }
+  } else { /* 취소 */ }
+};
+
+// 초기화
     attachAnswerListeners();
     showStart();
   </script>

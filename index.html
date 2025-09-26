@@ -196,43 +196,97 @@
     async function showLeaderboard(){clearInterval(timer);el.start.style.display='none';el.quiz.style.display='none';el.leaderboard.style.display='block';el.scoreBoard.style.display='none';await renderLeaderboard();}
 
     // ===== 게임 로직 =====
-    function startGame(){
-      playerName=el.nameInput.value||'게스트';el.playerBadge.textContent=playerName;
-      score=0;idx=0;lives=MAX_LIVES;el.lives.textContent=lives;el.score.textContent=score;el.qIndex.textContent=0; gameEnded=false;
-      order=[...Array(QUESTIONS.length).keys()];shuffle(order);showQuiz();nextQuestion();
+  function startGame(){
+  playerName = el.nameInput.value || '게스트';
+  el.playerBadge.textContent = playerName;
+  score = 0; idx = 0; lives = MAX_LIVES;
+  el.lives.textContent = lives; el.score.textContent = score; el.qIndex.textContent = 0;
+  gameEnded = false;                         // ← 중복 저장 방지 플래그 리셋
+  order = [...Array(QUESTIONS.length).keys()];
+  shuffle(order);
+  showQuiz();
+  nextQuestion();
+}
+
+function nextQuestion(){
+  if (gameEnded) return;                    // ← 이미 끝났으면 진행 중단
+  if (lives <= 0) { endGame(false); return; }
+  if (score >= TARGET) { endGame(true); return; }
+
+  if (order.length === 0) {
+    order = [...Array(QUESTIONS.length).keys()];
+    shuffle(order);                          // 무한 랜덤 로테이션
+  }
+  currentQ = QUESTIONS[order.shift()]; idx++;
+  el.qIndex.textContent = idx;
+  el.ref.textContent = `${currentQ.book} ${currentQ.ref}`;
+  el.verse.innerHTML = `${currentQ.before} <span class="blank">_____</span> ${currentQ.after}`;
+  resetAnswerInput();
+  locked = false;
+  setTimeout(()=>{ try{ el.answer.focus(); }catch(e){} }, 0);
+  runTimer();
+}
+
+function runTimer(){
+  left = LIMIT;
+  el.time.textContent = left;
+  el.bar.style.width = '100%';
+  clearInterval(timer);
+  timer = setInterval(()=>{
+    left--;
+    el.time.textContent = left;
+    el.bar.style.width = (left / LIMIT * 100) + '%';
+    if (left < 0) {
+      clearInterval(timer);
+      loseLife(`⏰ 시간초과! 정답: ${currentQ.blank}`);
+    }
+  }, 1000);
+}
+
+function isCorrectInput(){
+  if (!currentQ) return false;
+  const ans = norm(el.answer.value);
+  const accepts = (currentQ.answers && currentQ.answers.length ? currentQ.answers : [currentQ.blank]).map(norm);
+  return accepts.includes(ans);
+}
+
+function submitAnswer(){
+  if (locked || gameEnded) return;          // ← 중복 입력 방지
+  locked = true;
+
+  const ans = norm(el.answer.value.trim());
+  const accepts = (currentQ.answers && currentQ.answers.length ? currentQ.answers : [currentQ.blank]).map(norm);
+
+  if (accepts.includes(ans)) {
+    score += POINT;
+    el.score.textContent = score;
+    feedback(true, '정답!');
+
+    if (score >= TARGET) {                  // ← 여기서 즉시 종료
+      clearInterval(timer);
+      endGame(true);                        // setTimeout 없이 바로 호출
+      return;                               // ← 중요: 더 진행하지 않음
     }
 
-    function nextQuestion(){
-      if(gameEnded) return;
-      if(lives<=0){endGame(false);return;}
-      if(score>=TARGET){endGame(true);return;}
-      if(order.length===0){order=[...Array(QUESTIONS.length).keys()];shuffle(order);} // 무한 랜덤 로테이션
-      currentQ=QUESTIONS[order.shift()];idx++;
-      el.qIndex.textContent=idx;el.ref.textContent=`${currentQ.book} ${currentQ.ref}`;
-      el.verse.innerHTML=`${currentQ.before} <span class="blank">_____</span> ${currentQ.after}`;
-      resetAnswerInput();locked=false;setTimeout(()=>{try{el.answer.focus();}catch(e){}},0);runTimer();
-    }
+    setTimeout(nextQuestion, 650);
+  } else {
+    loseLife('오답! 정답: ' + currentQ.blank);
+  }
+}
 
-    function runTimer(){left=LIMIT;el.time.textContent=left;el.bar.style.width='100%';clearInterval(timer);timer=setInterval(()=>{left--;el.time.textContent=left;el.bar.style.width=(left/LIMIT*100)+'%';if(left<0){clearInterval(timer);loseLife(`⏰ 시간초과! 정답: ${currentQ.blank}`);}},1000);}
+function loseLife(msg){
+  locked = true;
+  lives--; el.lives.textContent = lives;
+  feedback(false, msg);
+  if (lives <= 0) { endGame(false); }
+  else { setTimeout(nextQuestion, 800); }
+}
 
-    function isCorrectInput(){if(!currentQ)return false;const ans=norm(el.answer.value);const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);return accepts.includes(ans);}    
-
-    function submitAnswer(){if(locked)return;locked=true;const ans=norm(el.answer.value.trim());const accepts=(currentQ.answers&&currentQ.answers.length?currentQ.answers:[currentQ.blank]).map(norm);if(accepts.includes(ans)){score+=POINT;el.score.textContent=score;feedback(true,'정답!');
-        if(score>=TARGET){
-          clearInterval(timer);
-          setTimeout(()=>endGame(true),300);
-        } else {
-          setTimeout(nextQuestion,650);
-        }}else{loseLife('오답! 정답: '+currentQ.blank);}}
-
-    function loseLife(msg){locked=true;lives--;el.lives.textContent=lives;feedback(false,msg);if(lives<=0){endGame(false);}else{setTimeout(nextQuestion,800);}}
-
-    function feedback(ok,msg){el.feedback.style.display='block';el.feedback.textContent=msg;el.feedback.className='result '+(ok?'good':'bad');}
-
-    // 입력칸을 항상 새로 생성하여 이전 값 잔존 제거
-    function resetAnswerInput(){const old=document.getElementById('answer');const fresh=old.cloneNode(false);fresh.id='answer';fresh.className=old.className;fresh.type='text';fresh.placeholder=old.placeholder;fresh.autocomplete='off';fresh.autocapitalize='off';fresh.autocorrect='off';fresh.spellcheck=false;fresh.inputMode='text';old.parentNode.replaceChild(fresh,old);el.answer=fresh;el.answer.value='';attachAnswerListeners();}
-
-    function attachAnswerListeners(){el.answer.addEventListener('keydown',e=>{if(e.key==='Enter'){submitAnswer();}});el.answer.addEventListener('input',()=>{if(!locked&&isCorrectInput()){submitAnswer();}});}    
+function feedback(ok, msg){
+  el.feedback.style.display = 'block';
+  el.feedback.textContent = msg;
+  el.feedback.className = 'result ' + (ok ? 'good' : 'bad');
+}
 
     // ===== 랭킹 저장/조회 (Firebase) =====
     async function endGame(success=true){

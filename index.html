@@ -124,26 +124,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const recordsCol = db.collection('records');
-    let QUESTIONS = [
-  {book:"출애굽기",ref:"20:12",before:"네 부모를",blank:"공경하라",after:"",answers:["공경하라","공경"]},
-  {book:"에베소서",ref:"6:1",before:"자녀들아 너희",blank:"부모에게 순종하라",after:"",answers:["부모에게 순종하라","부모"]},
-  {book:"시편",ref:"119:105",before:"주의 말씀은 내 발에",blank:"등이요",after:" 내 길에 빛이니이다",answers:["등이요","등"]},
-  {book:"마가복음",ref:"10:14",before:"어린아이들이 내게 오는 것을",blank:"용납하라",after:"",answers:["용납하라","허락하라"]},
-  {book:"요한일서",ref:"4:19",before:"우리가 사랑함은 그가 먼저 우리를",blank:"사랑하셨음이라",after:"",answers:["사랑하셨음이라","사랑하셨다"]},
-  {book:"빌립보서",ref:"4:4",before:"주 안에서 항상",blank:"기뻐하라",after:"",answers:["기뻐하라","기뻐"]},
-  {book:"잠언",ref:"3:5",before:"너는 마음을 다하여 여호와를",blank:"의뢰하고",after:"",answers:["의뢰하고","신뢰하고"]},
-  {book:"잠언",ref:"22:6",before:"마땅히 행할 길을",blank:"아이에게 가르치라",after:"",answers:["아이에게 가르치라","아이"]},
-  {book:"시편",ref:"150:6",before:"호흡이 있는 자마다",blank:"여호와를 찬양할지어다",after:"",answers:["여호와를 찬양할지어다","찬양할지어다"]},
-  {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요",blank:"진리요 생명이니",after:"",answers:["진리요 생명이니","진리요 생명"]},
-  {book:"창세기",ref:"1:1",before:"태초에 하나님이 천지를",blank:"창조하시니라",after:"",answers:["창조하시니라","창조"]},
-  {book:"시편",ref:"121:2",before:"나의 도움이 천지를 지으신",blank:"여호와에게서로다",after:"",answers:["여호와에게서로다","여호와"]},
-  {book:"마태복음",ref:"7:7",before:"구하라 그러면 너희에게",blank:"주실 것이요",after:"",answers:["주실 것이요","주신다"]},
-  {book:"데살로니가전서",ref:"5:17",before:"쉬지 말고",blank:"기도하라",after:"",answers:["기도하라","기도"]},
-  {book:"데살로니가전서",ref:"5:18",before:"범사에",blank:"감사하라",after:"",answers:["감사하라","감사"]},
-  {book:"요한계시록",ref:"22:20",before:"주 예수여",blank:"오시옵소서",after:"",answers:["오시옵소서","오시옵소서 아멘"]}
-];
-QUESTIONS.push(
-  // --- 1~20 ---
+   // ✅ 초등학생용 40문제 (정답=단어, 중복 ref 제거)
+let QUESTIONS = [
   {book:"창세기",ref:"1:1",before:"태초에",blank:"하나님",after:"이 천지를 창조하시니라",answers:["하나님"]},
   {book:"시편",ref:"23:1",before:"여호와는 나의",blank:"목자",after:"시니 내가 부족함이 없으리로다",answers:["목자"]},
   {book:"요한복음",ref:"14:6",before:"예수께서 이르시되 내가 곧 길이요 진리요",blank:"생명",after:"이니",answers:["생명"]},
@@ -152,6 +134,8 @@ QUESTIONS.push(
   {book:"이사야",ref:"9:6",before:"이는 한 아기가 우리에게 났고 한",blank:"아들",after:"을 우리에게 주신 바 되었는데",answers:["아들"]},
   {book:"요한일서",ref:"4:8",before:"사랑하지 아니하는 자는",blank:"하나님",after:"을 알지 못하나니",answers:["하나님"]},
   {book:"마태복음",ref:"6:11",before:"오늘 우리에게 일용할",blank:"양식",after:"을 주옵시고",answers:["양식"]},
+  {book:"출애굽기",ref:"20:13",before:"너는",blank:"살인",after:"하지 말라",answers:["살인"]},
+  {book:"출애굽기",ref:"20:15",before:"너는",blank:"도둑질",after:"하지 말라",answers:["도둑질"]},
   {book:"출애굽기",ref:"20:16",before:"너는 네 이웃에 대하여",blank:"거짓",after:"증거하지 말라",answers:["거짓"]},
   {book:"마태복음",ref:"22:39",before:"네",blank:"이웃",after:"을 네 자신과 같이 사랑하라 하셨으니",answers:["이웃"]},
   {book:"요한복음",ref:"6:35",before:"예수께서 이르시되 나는 생명의",blank:"떡",after:"이니",answers:["떡"]},
@@ -163,7 +147,6 @@ QUESTIONS.push(
   {book:"고린도전서",ref:"13:13",before:"그런즉 믿음 소망",blank:"사랑",after:"이 항상 있을 것인데",answers:["사랑"]},
   {book:"빌립보서",ref:"4:4",before:"주 안에서 항상",blank:"기뻐",after:"하라",answers:["기뻐","기뻐하라"]},
 
-  // --- 21~40 (새로 추가, 중복 참고 절 제거) ---
   {book:"요한복음",ref:"3:16",before:"하나님이 세상을 이처럼 사랑하사",blank:"독생자",after:"를 주셨으니",answers:["독생자"]},
   {book:"마태복음",ref:"5:14",before:"너희는 세상의",blank:"빛",after:"이라",answers:["빛"]},
   {book:"마태복음",ref:"6:33",before:"그런즉 너희는 먼저 그의 나라와 그의",blank:"의",after:"를 구하라",answers:["의"]},
@@ -184,7 +167,7 @@ QUESTIONS.push(
   {book:"누가복음",ref:"19:10",before:"인자가 온 것은 잃어버린 자를 찾아",blank:"구원",after:"하려 함이니라",answers:["구원"]},
   {book:"고린도전서",ref:"10:31",before:"무엇을 하든지 다 하나님의",blank:"영광",after:"을 위하여 하라",answers:["영광"]},
   {book:"빌립보서",ref:"4:6",before:"아무 것도",blank:"염려",after:"하지 말고",answers:["염려"]}
-);
+];
 
 
     // ===== 게임 설정 상수 =====
